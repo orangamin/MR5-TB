@@ -112,16 +112,16 @@ class _AzureOpenAISettings(BaseSettings):
     stop_sequence: Optional[List[str]] = None
     seed: Optional[int] = None
     choices_count: Optional[conint(ge=1, le=128)] = Field(default=1, serialization_alias="n")
-    user: Optional[str] = None
+    # user: Optional[str] = None # not used, different user accredition
     tools: Optional[conlist(_AzureOpenAITool, min_length=1)] = None
     tool_choice: Optional[str] = None
     logit_bias: Optional[dict] = None
     presence_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
     frequency_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
     system_message: str = "You are an AI assistant that helps people find information."
-    preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION
-    embedding_endpoint: Optional[str] = None
-    embedding_key: Optional[str] = None
+    # preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION # no used, should have one defined for costing
+    # embedding_endpoint: Optional[str] = None # not currently used, can be repointed if needed? or dynamic
+    # embedding_key: Optional[str] = None # not currently used, use case security for embeds?
     embedding_name: Optional[str] = None
     function_call_azure_functions_enabled: Optional[bool] = False
     function_call_azure_functions_tools_key: Optional[str] = None
