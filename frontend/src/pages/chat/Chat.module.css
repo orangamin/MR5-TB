@@ -1,10 +1,11 @@
+/* container */
 .container {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
+/* chat */
 .chatRoot {
   flex: 1;
   display: flex;
@@ -29,6 +30,17 @@
   max-height: calc(100vh - 100px);
 }
 
+.rtsDigitalContainer {
+    position: absolute;
+    bottom: 35px;
+    right: 20px;
+  }
+
+.rtsDigitalContainer img {
+    width: 248px; /* Adjust if you want to control the width */
+    height: auto; /* Or whatever size looks best */
+}
+
 .chatEmptyState {
   flex-grow: 1;
   display: flex;
@@ -50,20 +62,63 @@
 }
 
 .chatEmptyStateSubtitle {
-  margin-top: 20px;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 150%;
-  align-items: flex-end;
-  text-align: center;
-  letter-spacing: -0.01em;
-  color: #616161;
+    margin-top: 13px;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 150%;
+    display: flex;
+    align-items: flex-end;
+    text-align: center;
+    letter-spacing: -0.01em;
+    color: #616161;
+}
+.chatEmptyStateSubtitleTwo {
+    margin-top: 0px;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 16px;
+    line-height:125%;
+    text-align: center;
+    display: flex;
+    align-items: flex-end;
+    letter-spacing: -0.01em;
+    color: #616161;
+}
+
+.chatEmptyStateSubtitleThree {
+    margin-top: 0px;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 10px;
+    line-height:150%;
+    text-align: center;
+    display: flex;
+    align-items: flex-end;
+    letter-spacing: -0.01em;
+    color: #616161;
+}
+
+.builtbyText {
+    align-self: flex-start; /* Align to the start of the flex container */
+    font-style: italic;
+    width: 100%; /* Full width to align text to the left */
+    font-size: 14px; /* Set font size */
+    color: #A9A9A9; /* Set color */
+    padding-left: 25px; /* Add some padding from the left */
+    padding-bottom: 38px; /* Add some padding from the bottom */
+}
+
+.builtbyTextContainer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Take full width to contain the text properly */
 }
 
 .chatIcon {
-  height: 62px;
-  width: auto;
+    height: 240px;
+    width: 288px;
 }
 
 .chatMessageStream {
@@ -85,8 +140,8 @@
 }
 
 .chatMessageUserMessage {
-  position: relative;
-  display: flex;
+  position: relative; /* Position relative for absolute positioning of children */
+  display: flex; /* Flex container for child elements */
   padding: 20px;
   background: #edf5fd;
   border-radius: 8px;
@@ -99,10 +154,11 @@
   line-height: 22px;
   color: #242424;
   order: 0;
+  flex: none;
   flex-grow: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
-  max-width: 80%;
+  max-width: 800px; /* maybe should be 80%*/
 }
 
 .chatMessageGpt {
@@ -162,6 +218,7 @@
   left: 7px;
   top: 13px;
   color: #ffffff;
+  border: 1px solid #D1D1D1;
   border-radius: 4px;
   z-index: 1;
 }
@@ -178,6 +235,7 @@
   left: 7px;
   top: 66px;
   color: #ffffff;
+  border: 1px solid #D1D1D1;
   border-radius: 4px;
   z-index: 1;
 }
@@ -194,6 +252,7 @@
   left: 7px;
   top: 66px;
   color: #ffffff;
+  border: 1px solid #D1D1D1;
   border-radius: 4px;
   z-index: 1;
 }

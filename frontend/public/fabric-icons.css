@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'FabricMDL2Icons';
+    src: 
+      url('/static/fonts/fabric-icons-1-4d521695.woff') format('woff'), 
+      url('/static/fonts/fabric-icons-4-a65dcc0a.woff') format('woff'),
+      url('/static/fonts/fabric-icons-a13498cf.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  
