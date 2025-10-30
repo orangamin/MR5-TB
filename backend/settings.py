@@ -118,10 +118,13 @@ class _AzureOpenAISettings(BaseSettings):
     logit_bias: Optional[dict] = None
     presence_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
     frequency_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
-    system_message: str = "You are an AI assistant that helps people find information."
-    # preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION # no used, should have one defined for costing
-    # embedding_endpoint: Optional[str] = None # not currently used, can be repointed if needed? or dynamic
-    # embedding_key: Optional[str] = None # not currently used, use case security for embeds?
+    system_message_1: str = "You are an AI assistant that helps people find information." # main 
+    system_message_2: str = ""    # processing prompt 
+    system_message_3: str = ""
+    system_message_4: str = ""
+    preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION # no used, should have one defined for costing
+    embedding_endpoint: Optional[str] = None # not currently used, can be repointed if needed? or dynamic
+    embedding_key: Optional[str] = None # not currently used, use case security for embeds?
     embedding_name: Optional[str] = None
     function_call_azure_functions_enabled: Optional[bool] = False
     function_call_azure_functions_tools_key: Optional[str] = None
