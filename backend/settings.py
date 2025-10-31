@@ -217,7 +217,7 @@ class _AzureOpenAISettings_5(BaseSettings):
     model5: str = ""
     key: Optional[str] = None
     resource: Optional[str] = None
-    endpoint: Optional[str] = None
+    endpoint: Optional[str] = None #
     # temperature: float = 0 # temperature is not used in gpt5
     # top_p: float = 0 # top_p is not used in gpt5
     max_completion_tokens_5 : int = 20000
