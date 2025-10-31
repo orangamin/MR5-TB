@@ -22,6 +22,11 @@ interface Props {
   onExectResultClicked: (answerId: string) => void
 }
 
+const generateSharePointUrl = (filepath: string) => {
+    const filename = filepath.split('.')[0];  // Remove extension and anything after
+    return `https://downergroup.sharepoint.com/sites/TrainBrainandGenAIRetrievalAssistants/_layouts/15/search.aspx?q=${encodeURIComponent(filename)}`;
+};
+
 export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Props) => {
   const initializeAnswerFeedback = (answer: AskResponse) => {
     if (answer.message_id == undefined) return undefined
@@ -327,7 +332,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             <span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
           </Stack.Item>
           {!!answer.exec_results?.length && (
-            <Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
+            <Stack.Item onKeyDown={e => (e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null)}>
               <Stack style={{ width: '100%' }}>
                 <Stack horizontal horizontalAlign="start" verticalAlign="center">
                   <Text
@@ -353,6 +358,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
         {chevronIsExpanded && (
           <div className={styles.citationWrapper}>
             {parsedAnswer?.citations.map((citation, idx) => {
+              const sharePointUrl = generateSharePointUrl(citation.filepath || `Citation ${idx}`);
               return (
                 <span
                   title={createCitationFilepath(citation, ++idx)}

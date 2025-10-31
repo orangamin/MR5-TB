@@ -164,7 +164,7 @@ async def init_openai_client():
 
         # Remote function calls
         if app_settings.azure_openai_5.function_call_azure_functions_enabled:
-            azure_functions_tools_url = f"{app_settings.azure_openai_5.function_call_azure_functions_tools_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tools_key}"
+            azure_functions_tools_url = f"{app_settings.azure_openai_5.function_call_azure_functions_tools_base_url}?code={app_settings.azure_openai_5.function_call_azure_functions_tools_key}"
             async with httpx.AsyncClient() as client:
                 response = await client.get(azure_functions_tools_url)
             response_status_code = response.status_code
@@ -194,7 +194,7 @@ async def openai_remote_azure_function_call(function_name, function_args):
     if app_settings.azure_openai_5.function_call_azure_functions_enabled is not True:
         return
 
-    azure_functions_tool_url = f"{app_settings.azure_openai_5.function_call_azure_functions_tool_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tool_key}"
+    azure_functions_tool_url = f"{app_settings.azure_openai_5.function_call_azure_functions_tool_base_url}?code={app_settings.azure_openai_5.function_call_azure_functions_tool_key}"
     headers = {'content-type': 'application/json'}
     body = {
         "tool_name": function_name,
@@ -1051,7 +1051,7 @@ async def generate_title(conversation_messages) -> str:
     try:
         azure_openai_client = await init_openai_client()
         response = await azure_openai_client.chat.completions.create(
-            model=app_settings.azure_openai.model, messages=messages, temperature=1, max_tokens=64
+            model=app_settings.azure_openai_5.model, messages=messages, temperature=1, max_tokens=64
         )
 
         title = response.choices[0].message.content
