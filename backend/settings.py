@@ -93,7 +93,7 @@ class _AzureOpenAITool(BaseModel):
     function: _AzureOpenAIFunction
     
 
-class _AzureOpenAISettings(BaseSettings):
+class _AzureOpenAISettings_B4(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="AZURE_OPENAI_",
         env_file=DOTENV_PATH,
@@ -101,7 +101,7 @@ class _AzureOpenAISettings(BaseSettings):
         env_ignore_empty=True
     )
     
-    model: str
+    model: str = ""
     key: Optional[str] = None
     resource: Optional[str] = None
     endpoint: Optional[str] = None
@@ -118,10 +118,10 @@ class _AzureOpenAISettings(BaseSettings):
     logit_bias: Optional[dict] = None
     presence_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
     frequency_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
-    system_message_1: str = "You are an AI assistant that helps people find information." # main 
-    system_message_2: str = ""    # processing prompt 
-    system_message_3: str = ""
-    system_message_4: str = ""
+    system_message: str = "You are an AI assistant that helps people find information." # main 
+    # system_message_2: str = ""    # processing prompt 
+    # system_message_3: str = ""
+    # system_message_4: str = ""
     preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION # no used, should have one defined for costing
     embedding_endpoint: Optional[str] = None # not currently used, can be repointed if needed? or dynamic
     embedding_key: Optional[str] = None # not currently used, use case security for embeds?
@@ -204,7 +204,123 @@ class _AzureOpenAISettings(BaseSettings):
         else:   
             return None
     
-
+class _AzureOpenAISettings_5(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="AZURE_OPENAI_",
+        env_file=DOTENV_PATH,
+        extra='ignore',
+        env_ignore_empty=True
+    )
+    model_5: str = ""
+    key: Optional[str] = None
+    resource: Optional[str] = None
+    endpoint: Optional[str] = None
+    # temperature: float = 0 # temperature is not used in gpt5
+    # top_p: float = 0 # top_p is not used in gpt5
+    max_completion_tokens_5 : int = 20000
+    stream: bool = True
+    stop_sequence: Optional[List[str]] = None
+    seed: Optional[int] = None
+    choices_count: Optional[conint(ge=1, le=128)] = Field(default=1, serialization_alias="n")
+    # user: Optional[str] = None # not used, different user accredition
+    tools: Optional[conlist(_AzureOpenAITool, min_length=1)] = None
+    tool_choice: Optional[str] = None
+    logit_bias: Optional[dict] = None
+    presence_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
+    frequency_penalty: Optional[confloat(ge=-2.0, le=2.0)] = 0.0
+    # 'system message' role is being phased out for 'developer'
+    developer_message: str = "You are an AI assistant that helps people find information." # main 
+    # developer_message_2: str = ""   # processing prompt 
+    # developer_message_3: str = ""   # safe guarding prompt 
+    # developer_message_4: str = ""
+    preview_api_version: str = MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION
+    embedding_endpoint: Optional[str] = None # not currently used, can be repointed if needed? or dynamic
+    embedding_key: Optional[str] = None # not currently used, use case security for embeds?
+    embedding_name: Optional[str] = None
+    function_call_azure_functions_enabled: Optional[bool] = False
+    function_call_azure_functions_tools_key: Optional[str] = None
+    function_call_azure_functions_tools_base_url: Optional[str] = None
+    function_call_azure_functions_tool_key: Optional[str] = None
+    function_call_azure_functions_tool_base_url: Optional[str] = None
+    
+    @field_validator('tools', mode='before')
+    @classmethod
+    def deserialize_tools(cls, tools_json_str: str) -> List[_AzureOpenAITool]:
+        if isinstance(tools_json_str, str):
+            try:
+                tools_dict = json.loads(tools_json_str)
+                return _AzureOpenAITool(**tools_dict)
+            except json.JSONDecodeError:
+                logging.warning("No valid tool definition found in the environment.  If you believe this to be in error, please check that the value of AZURE_OPENAI_TOOLS is a valid JSON string.")
+            
+            except ValidationError as e:
+                logging.warning(f"An error occurred while deserializing the tool definition - {str(e)}")
+            
+        return None
+    
+    @field_validator('logit_bias', mode='before')
+    @classmethod
+    def deserialize_logit_bias(cls, logit_bias_json_str: str) -> dict:
+        if isinstance(logit_bias_json_str, str):
+            try:
+                return json.loads(logit_bias_json_str)
+            except json.JSONDecodeError as e:
+                logging.warning(f"An error occurred while deserializing the logit bias string -- {str(e)}")
+                
+        return None
+        
+    @field_validator('stop_sequence', mode='before')
+    @classmethod
+    def split_contexts(cls, comma_separated_string: str) -> List[str]:
+        if isinstance(comma_separated_string, str) and len(comma_separated_string) > 0:
+            return parse_multi_columns(comma_separated_string)
+        
+        return None
+    
+    @model_validator(mode="after")
+    def ensure_endpoint(self) -> Self:
+        """
+        Resource validation
+        """
+        if self.endpoint:
+            return Self
+        
+        elif self.resource:
+            self.endpoint = f"https://{self.resource}.openai.azure.com"
+            return Self
+        
+        raise ValidationError("AZURE_OPENAI_ENDPOINT or AZURE_OPENAI_RESOURCE is required")
+        
+    def extract_embedding_dependency(self) -> Optional[dict]:
+        '''
+         Extract embedding dependency configuration RAGger
+         '''
+        if self.embedding_name:
+            return {
+                "type": "deployment_name",
+                "deployment_name": self.embedding_name
+            }
+        elif self.embedding_endpoint:
+            if self.embedding_key:
+                return {
+                    "type": "endpoint",
+                    "endpoint": self.embedding_endpoint,
+                    "authentication": {
+                        "type": "api_key",
+                        "key": self.embedding_key
+                    }
+                }
+            else:
+                return {
+                    "type": "endpoint",
+                    "endpoint": self.embedding_endpoint,
+                    "authentication": {
+                        "type": "system_assigned_managed_identity"
+                    }
+                }
+        else:   
+            return None
+        
 class _SearchCommonSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="SEARCH_",
@@ -768,7 +884,10 @@ class _BaseSettings(BaseSettings):
 
 class _AppSettings(BaseModel):
     base_settings: _BaseSettings = _BaseSettings()
-    azure_openai: _AzureOpenAISettings = _AzureOpenAISettings()
+    # instance of models using old params scheme
+    azure_openai: _AzureOpenAISettings_B4 = _AzureOpenAISettings_B4()
+    # new instance for multiple gpt configs
+    azure_openai_5: _AzureOpenAISettings_5 = _AzureOpenAISettings_5()
     search: _SearchCommonSettings = _SearchCommonSettings()
     ui: Optional[_UiSettings] = _UiSettings()
     

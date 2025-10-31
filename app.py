@@ -113,7 +113,7 @@ MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "true").lower() == "
 
 azure_openai_tools = []
 azure_openai_available_tools = []
-
+### changes to incorporate gpt5
 # Initialize Azure OpenAI Client
 async def init_openai_client():
     azure_openai_client = None
@@ -121,7 +121,7 @@ async def init_openai_client():
     try:
         # API version check
         if (
-            app_settings.azure_openai.preview_api_version
+            app_settings.azure_openai_5.preview_api_version
             < MINIMUM_SUPPORTED_AZURE_OPENAI_PREVIEW_API_VERSION
         ):
             raise ValueError(
@@ -130,21 +130,21 @@ async def init_openai_client():
 
         # Endpoint
         if (
-            not app_settings.azure_openai.endpoint and
-            not app_settings.azure_openai.resource
+            not app_settings.azure_openai_5.endpoint and
+            not app_settings.azure_openai_5.resource
         ):
             raise ValueError(
                 "AZURE_OPENAI_ENDPOINT or AZURE_OPENAI_RESOURCE is required"
             )
 
         endpoint = (
-            app_settings.azure_openai.endpoint
-            if app_settings.azure_openai.endpoint
-            else f"https://{app_settings.azure_openai.resource}.openai.azure.com/"
+            app_settings.azure_openAI_5.endpoint
+            if app_settings.azure_openai_5.endpoint
+            else f"https://{app_settings.azure_openai_5.resource}.openai.azure.com/"
         )
 
         # Authentication
-        aoai_api_key = app_settings.azure_openai.key
+        aoai_api_key = app_settings.azure_openai_5.key
         ad_token_provider = None
         if not aoai_api_key:
             logging.debug("No AZURE_OPENAI_KEY found, using Azure Entra ID auth")
@@ -155,7 +155,7 @@ async def init_openai_client():
                 )
 
         # Deployment
-        deployment = app_settings.azure_openai.model
+        deployment = app_settings.azure_openai_5.model
         if not deployment:
             raise ValueError("AZURE_OPENAI_MODEL is required")
 
@@ -163,8 +163,8 @@ async def init_openai_client():
         default_headers = {"x-ms-useragent": USER_AGENT}
 
         # Remote function calls
-        if app_settings.azure_openai.function_call_azure_functions_enabled:
-            azure_functions_tools_url = f"{app_settings.azure_openai.function_call_azure_functions_tools_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tools_key}"
+        if app_settings.azure_openai_5.function_call_azure_functions_enabled:
+            azure_functions_tools_url = f"{app_settings.azure_openai_5.function_call_azure_functions_tools_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tools_key}"
             async with httpx.AsyncClient() as client:
                 response = await client.get(azure_functions_tools_url)
             response_status_code = response.status_code
@@ -177,7 +177,7 @@ async def init_openai_client():
 
         
         azure_openai_client = AsyncAzureOpenAI(
-            api_version=app_settings.azure_openai.preview_api_version,
+            api_version=app_settings.azure_openai_5.preview_api_version,
             api_key=aoai_api_key,
             azure_ad_token_provider=ad_token_provider,
             default_headers=default_headers,
@@ -191,10 +191,10 @@ async def init_openai_client():
         raise e
 
 async def openai_remote_azure_function_call(function_name, function_args):
-    if app_settings.azure_openai.function_call_azure_functions_enabled is not True:
+    if app_settings.azure_openai_5.function_call_azure_functions_enabled is not True:
         return
 
-    azure_functions_tool_url = f"{app_settings.azure_openai.function_call_azure_functions_tool_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tool_key}"
+    azure_functions_tool_url = f"{app_settings.azure_openai_5.function_call_azure_functions_tool_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tool_key}"
     headers = {'content-type': 'application/json'}
     body = {
         "tool_name": function_name,
@@ -245,7 +245,7 @@ def prepare_model_args(request_body, request_headers):
         messages = [
             {
                 "role": "system",
-                "content": app_settings.azure_openai.system_message
+                "content": app_settings.azure_openai_5.system_message
             }
         ]
 
@@ -283,17 +283,18 @@ def prepare_model_args(request_body, request_headers):
 
     model_args = {
         "messages": messages,
-        "temperature": app_settings.azure_openai.temperature,
-        "max_tokens": app_settings.azure_openai.max_tokens,
-        "top_p": app_settings.azure_openai.top_p,
-        "stop": app_settings.azure_openai.stop_sequence,
-        "stream": app_settings.azure_openai.stream,
-        "model": app_settings.azure_openai.model
+        "max_tokens": app_settings.azure_openai_5.max_completion_tokens,
+        ### depreciated for gpt5
+        # "temperature": app_settings.azure_openai.temperature,
+        # "top_p": app_settings.azure_openai.top_p,
+        "stop": app_settings.azure_openai_5.stop_sequence,
+        "stream": app_settings.azure_openai_5.stream,
+        "model": app_settings.azure_openai_5.model
     }
 
     if len(messages) > 0:
         if messages[-1]["role"] == "user":
-            if app_settings.azure_openai.function_call_azure_functions_enabled and len(azure_openai_tools) > 0:
+            if app_settings.azure_openai_5.function_call_azure_functions_enabled and len(azure_openai_tools) > 0:
                 model_args["tools"] = azure_openai_tools
 
             if app_settings.datasource:
@@ -455,7 +456,7 @@ async def complete_chat_request(request_body, request_headers):
         history_metadata = request_body.get("history_metadata", {})
         non_streaming_response = format_non_streaming_response(response, history_metadata, apim_request_id)
 
-        if app_settings.azure_openai.function_call_azure_functions_enabled:
+        if app_settings.azure_openai_5.function_call_azure_functions_enabled:
             function_response = await process_function_call(response)  # Add await here
 
             if function_response:
@@ -536,7 +537,7 @@ async def stream_chat_request(request_body, request_headers):
     history_metadata = request_body.get("history_metadata", {})
     
     async def generate(apim_request_id, history_metadata):
-        if app_settings.azure_openai.function_call_azure_functions_enabled:
+        if app_settings.azure_openai_5.function_call_azure_functions_enabled:
             # Maintain state during function call streaming
             function_call_stream_state = AzureOpenaiFunctionCallStreamState()
             
@@ -564,7 +565,7 @@ async def stream_chat_request(request_body, request_headers):
 
 async def conversation_internal(request_body, request_headers):
     try:
-        if app_settings.azure_openai.stream and not app_settings.base_settings.use_promptflow:
+        if app_settings.azure_openai_5.stream and not app_settings.base_settings.use_promptflow:
             result = await stream_chat_request(request_body, request_headers)
             response = await make_response(format_as_ndjson(result))
             response.timeout = None
