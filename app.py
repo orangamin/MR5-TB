@@ -138,7 +138,7 @@ async def init_openai_client():
             )
 
         endpoint = (
-            app_settings.azure_openAI_5.endpoint
+            app_settings.azure_openai_5.endpoint
             if app_settings.azure_openai_5.endpoint
             else f"https://{app_settings.azure_openai_5.resource}.openai.azure.com/"
         )
@@ -155,7 +155,7 @@ async def init_openai_client():
                 )
 
         # Deployment
-        deployment = app_settings.azure_openai_5.model
+        deployment = app_settings.azure_openai_5.model5
         if not deployment:
             raise ValueError("AZURE_OPENAI_MODEL is required")
 
@@ -245,7 +245,7 @@ def prepare_model_args(request_body, request_headers):
         messages = [
             {
                 "role": "system",
-                "content": app_settings.azure_openai_5.system_message
+                "content": app_settings.azure_openai_5.developer_message
             }
         ]
 
@@ -283,13 +283,13 @@ def prepare_model_args(request_body, request_headers):
 
     model_args = {
         "messages": messages,
-        "max_tokens": app_settings.azure_openai_5.max_completion_tokens,
+        "max_completion_tokens": app_settings.azure_openai_5.max_completion_tokens_5,
         ### depreciated for gpt5
         # "temperature": app_settings.azure_openai.temperature,
         # "top_p": app_settings.azure_openai.top_p,
         "stop": app_settings.azure_openai_5.stop_sequence,
         "stream": app_settings.azure_openai_5.stream,
-        "model": app_settings.azure_openai_5.model
+        "model": app_settings.azure_openai_5.model5
     }
 
     if len(messages) > 0:
