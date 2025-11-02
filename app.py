@@ -283,13 +283,13 @@ def prepare_model_args(request_body, request_headers):
 
     model_args = {
         "messages": messages,
+        "model": app_settings.azure_openai_5.model5,
         "max_completion_tokens": app_settings.azure_openai_5.max_completion_tokens_5,
         ### depreciated for gpt5
         # "temperature": app_settings.azure_openai.temperature,
         # "top_p": app_settings.azure_openai.top_p,
         "stop": app_settings.azure_openai_5.stop_sequence,
-        "stream": app_settings.azure_openai_5.stream,
-        "model": app_settings.azure_openai_5.model5
+        "stream": app_settings.azure_openai_5.stream
     }
 
     if len(messages) > 0:
@@ -1051,8 +1051,9 @@ async def generate_title(conversation_messages) -> str:
     try:
         azure_openai_client = await init_openai_client()
         response = await azure_openai_client.chat.completions.create(
-            model=app_settings.azure_openai_5.model, messages=messages, temperature=1, max_tokens=64
+            model=app_settings.azure_openai_5.model, messages=messages, temperature=1, max_completion_tokens=64
         )
+        ### configured here from max_tokens to max_completion_tokens
 
         title = response.choices[0].message.content
         return title
