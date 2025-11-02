@@ -467,7 +467,7 @@ class _AzureSearchSettings(BaseSettings, DatasourcePayloadConstructor):
             self.filter = self._set_filter_string(request)
             
         self.embedding_dependency = \
-            self._settings.azure_openai.extract_embedding_dependency()
+            self._settings.azure_openai_5.extract_embedding_dependency()
         parameters = self.model_dump(exclude_none=True, by_alias=True)
         parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
         
@@ -540,7 +540,7 @@ class _AzureCosmosDbMongoVcoreSettings(
         **kwargs
     ):
         self.embedding_dependency = \
-            self._settings.azure_openai.extract_embedding_dependency()
+            self._settings.azure_openai_5.extract_embedding_dependency()
         parameters = self.model_dump(exclude_none=True, by_alias=True)
         parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
         return {
@@ -611,7 +611,7 @@ class _ElasticsearchSettings(BaseSettings, DatasourcePayloadConstructor):
     ):
         self.embedding_dependency = \
             {"type": "model_id", "model_id": self.embedding_model_id} if self.embedding_model_id else \
-            self._settings.azure_openai.extract_embedding_dependency() 
+            self._settings.azure_openai_5.extract_embedding_dependency() 
             
         parameters = self.model_dump(exclude_none=True, by_alias=True)
         parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
@@ -682,7 +682,7 @@ class _PineconeSettings(BaseSettings, DatasourcePayloadConstructor):
         **kwargs
     ):
         self.embedding_dependency = \
-            self._settings.azure_openai.extract_embedding_dependency()
+            self._settings.azure_openai_5.extract_embedding_dependency()
         parameters = self.model_dump(exclude_none=True, by_alias=True)
         parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
         
@@ -861,7 +861,7 @@ class _MongoDbSettings(BaseSettings, DatasourcePayloadConstructor):
         **kwargs
     ):
         self.embedding_dependency = \
-            self._settings.azure_openai.extract_embedding_dependency()
+            self._settings.azure_openai_5.extract_embedding_dependency()
             
         parameters = self.model_dump(exclude_none=True, by_alias=True)
         parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
