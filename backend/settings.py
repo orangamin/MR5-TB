@@ -214,7 +214,7 @@ class _AzureOpenAISettings_5(BaseSettings):
         extra='ignore',
         env_ignore_empty=True
     )
-    model5: str = ""
+    model_5: str = ""
     key: Optional[str] = None
     resource: Optional[str] = None
     endpoint: Optional[str] = None #
