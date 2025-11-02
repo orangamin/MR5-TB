@@ -284,7 +284,7 @@ def prepare_model_args(request_body, request_headers):
     model_args = {
         "messages": messages,
         "model": app_settings.azure_openai_5.model5,
-        "max_completion_tokens": app_settings.azure_openai_5.max_completion_tokens_5,
+        "max_completion_tokens": app_settings.azure_openai_5.max_completion_tokens,
         ### depreciated for gpt5
         # "temperature": app_settings.azure_openai.temperature,
         # "top_p": app_settings.azure_openai.top_p,
