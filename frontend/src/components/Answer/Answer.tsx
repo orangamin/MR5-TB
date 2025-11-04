@@ -8,18 +8,25 @@ import { ThumbDislike20Filled, ThumbLike20Filled } from '@fluentui/react-icons'
 import DOMPurify from 'dompurify'
 import remarkGfm from 'remark-gfm'
 import supersub from 'remark-supersub'
-import { AskResponse, Citation, Feedback, historyMessageFeedback } from '../../api'
+import { AskResponse, Citation, Feedback, historyMessageFeedback, submitFeedback } from "../../api";
+
 import { XSSAllowTags, XSSAllowAttributes } from '../../constants/sanatizeAllowables'
 import { AppStateContext } from '../../state/AppProvider'
 
 import { parseAnswer } from './AnswerParser'
 
 import styles from './Answer.module.css'
+import { ThumbLikeRegular, ThumbDislikeRegular, ThumbLikeFilled, ThumbDislikeFilled } from "@fluentui/react-icons";
+
 
 interface Props {
-  answer: AskResponse
-  onCitationClicked: (citedDocument: Citation) => void
-  onExectResultClicked: (answerId: string) => void
+  answer: AskResponse;
+  messageId: string;
+  conversationId: string;
+  generated_chart: string | null;
+  onCitationClicked: (citedDocument: Citation) => void;
+  onExectResultClicked: (answerId: string) => void;
+  onFeedback?: (feedback: 'like' | 'dislike') => void;
 }
 
 const generateSharePointUrl = (filepath: string) => {
@@ -27,25 +34,34 @@ const generateSharePointUrl = (filepath: string) => {
     return `https://downergroup.sharepoint.com/sites/TrainBrainandGenAIRetrievalAssistants/_layouts/15/search.aspx?q=${encodeURIComponent(filename)}`;
 };
 
-export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Props) => {
+export const Answer = ({
+  answer,
+  messageId,
+  conversationId,
+  onCitationClicked,
+  onExectResultClicked,
+  onFeedback
+
+}: Props) => {
   const initializeAnswerFeedback = (answer: AskResponse) => {
     if (answer.message_id == undefined) return undefined
     if (answer.feedback == undefined) return undefined
     if (answer.feedback.split(',').length > 1) return Feedback.Negative
     if (Object.values(Feedback).includes(answer.feedback)) return answer.feedback
     return Feedback.Neutral
-  }
+  };
 
   const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false)
   const filePathTruncationLimit = 50
 
-  const parsedAnswer = useMemo(() => parseAnswer(answer), [answer])
-  const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen)
-  const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer))
-  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false)
-  const [showReportInappropriateFeedback, setShowReportInappropriateFeedback] = useState(false)
-  const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([])
-  const appStateContext = useContext(AppStateContext)
+  const parsedAnswer = useMemo(() => parseAnswer(answer), [answer]);
+  const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
+  const [feedback, setFeedback] = useState<'like' | 'dislike' | null>(null);
+  const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
+  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+  const [showReportInappropriateFeedback, setShowReportInappropriateFeedback] = useState(false);
+  const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
+  const appStateContext = useContext(AppStateContext);
   const FEEDBACK_ENABLED =
     appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB
   const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
@@ -88,7 +104,28 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
       citationFilename = `Citation ${index}`
     }
     return citationFilename
-  }
+  };
+  const handleFeedback = async (feedbackType: 'like' | 'dislike') => {
+        try {
+            setFeedback(feedbackType);
+            onFeedback?.(feedbackType);
+            
+            // Use the messageId from the assistant's message
+            const response = await submitFeedback(
+                messageId,  // This should be the ID from the assistant's message
+                conversationId,
+                feedbackType
+            );
+
+            if (!response.ok) {
+                console.error('Failed to submit feedback');
+                setFeedback(null); // Reset on error
+            }
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+            setFeedback(null); // Reset on error
+        }
+    };  
 
   const onLikeResponseClicked = async () => {
     if (answer.message_id == undefined) return
@@ -303,7 +340,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
           </Stack>
         )}
         <Stack horizontal className={styles.answerFooter}>
-          {!!parsedAnswer?.citations.length && (
+          {parsedAnswer && parsedAnswer.citations && parsedAnswer.citations.length > 0 && (  
             <Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
               <Stack style={{ width: '100%' }}>
                 <Stack horizontal horizontalAlign="start" verticalAlign="center">
@@ -355,28 +392,82 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             </Stack.Item>
           )}
         </Stack>
-        {chevronIsExpanded && (
-          <div className={styles.citationWrapper}>
-            {parsedAnswer?.citations.map((citation, idx) => {
-              const sharePointUrl = generateSharePointUrl(citation.filepath || `Citation ${idx}`);
-              return (
-                <span
-                  title={createCitationFilepath(citation, ++idx)}
-                  tabIndex={0}
-                  role="link"
-                  key={idx}
-                  onClick={() => onCitationClicked(citation)}
-                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? onCitationClicked(citation) : null)}
-                  className={styles.citationContainer}
-                  aria-label={createCitationFilepath(citation, idx)}>
-                  <div className={styles.citation}>{idx}</div>
-                  {createCitationFilepath(citation, idx, true)}
-                </span>
-              )
-            })}
-          </div>
-        )}
-      </Stack>
+                {chevronIsExpanded && 
+                    <div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
+                        {parsedAnswer && parsedAnswer.citations && parsedAnswer.citations.map((citation, idx) => {
+                            const sharePointUrl = generateSharePointUrl(citation.filepath || `Citation ${idx}`);
+                            return (
+                                <span 
+                                    title={createCitationFilepath(citation, ++idx)} 
+                                    tabIndex={0} 
+                                    role="link" 
+                                    key={idx} 
+                                    onClick={() => onCitationClicked(citation)} 
+                                    onKeyDown={e => e.key === "Enter" || e.key === " " ? onCitationClicked(citation) : null}
+                                    className={styles.citationContainer}
+                                    aria-label={createCitationFilepath(citation, idx)}
+                                >
+                                    <div className={styles.citation}>{idx}</div>
+                                    {createCitationFilepath(citation, idx, true)}
+                                    <a
+                                        href={sharePointUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()} // Prevents the click from triggering parent click events
+                                    >
+                                        Search repository for this document
+                                    </a>
+                                </span>);
+                        })}
+                    </div>
+                }
+                <div className={styles.feedbackContainer}>
+                    {feedback === null && 
+                     answer.answer && 
+                     typeof answer.answer === 'string' &&  
+                     !answer.answer.includes("Generating answer...") &&
+                     (
+                        <>
+                            <button
+                                className={styles.feedbackButton}
+                                onClick={() => handleFeedback('like')}
+                                aria-label="Like response"
+                            >
+                                <ThumbLikeRegular />
+                            </button>
+                            <button
+                                className={styles.feedbackButton}
+                                onClick={async () => {
+                                    setFeedback('dislike');
+                                    onFeedback?.('dislike');
+                                    await submitFeedback(messageId, conversationId, 'dislike');
+                                }}
+                                aria-label="Dislike response"
+                            >
+                                <ThumbDislikeRegular />
+                            </button>
+                        </>
+                    )}
+                    {feedback === 'like' && (
+                        <button
+                            className={styles.feedbackButton}
+                            disabled
+                            aria-label="Liked response"
+                        >
+                            <ThumbLikeFilled />
+                        </button>
+                    )}
+                    {feedback === 'dislike' && (
+                        <button
+                            className={styles.feedbackButton}
+                            disabled
+                            aria-label="Disliked response"
+                        >
+                            <ThumbDislikeFilled />
+                        </button>
+                    )}
+                </div>                
+            </Stack>
       <Dialog
         onDismiss={() => {
           resetFeedbackDialog()

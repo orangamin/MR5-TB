@@ -352,3 +352,24 @@ export const historyMessageFeedback = async (messageId: string, feedback: string
     })
   return response
 }
+
+export async function submitFeedback(
+    messageId: string, 
+    conversationId: string, 
+    feedback: 'like' | 'dislike'
+): Promise<Response> {
+    const response = await fetch('/history/message/feedback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            messageId: messageId,
+            conversationId: conversationId,
+            //userId: userId,
+            feedback: feedback
+        })
+    });
+
+    return response;
+}

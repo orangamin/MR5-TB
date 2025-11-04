@@ -342,8 +342,8 @@ const Chat = () => {
       id: uuid(),
       role: 'user',
       content: questionContent as string,
-      date: new Date().toISOString()
-    }
+      date: new Date().toISOString(),
+    };
 
     let request: ConversationRequest
     let conversation
@@ -788,7 +788,7 @@ const parsePlotFromMessage = (message: ChatMessage): Plot | null => {
       }
     }
       return null
-} catch {
+} 
 return null
 }
 } */
@@ -872,23 +872,39 @@ return null
                                         {answer.role === "user" ? (
                                             <div className={styles.chatMessageUser} tabIndex={0}>
                                                 <div className={styles.chatMessageUserMessage}>
-                                                  {typeof answer.content === "string" && answer.content ? answer.content : Array.isArray(answer.content) ? <>{answer.content[0].text} <img className={styles.uploadedImageChat} src={answer.content[1].image_url.url} alt="Uploaded Preview" /></> : null}
+                                                  {typeof answer.content === "string" && answer.content
+                                                    ? answer.content 
+                                                    : Array.isArray(answer.content) ? (
+                                                      <>
+                                                        {answer.content[0].text}
+                                                        <img
+                                                          className={styles.uploadedImageChat}
+                                                          src={answer.content[1].image_url.url}
+                                                          alt="Uploaded Preview"
+                                                        />
+                                                      </>
+                                                  ) : null}
                                                 </div> 
                                             </div>
                                         ) : answer.role === "assistant" ? (
                                              <div className={styles.chatMessageGpt}>
-                                              {typeof answer.content === "string" && <Answer
+                                              {typeof answer.content === "string" && (
+                                                <Answer
                                                     answer={{
                                                         answer: answer.content,
-                                                        citations: parseCitationFromMessage(messages[index - 1]),
+                                                        message_id: answer.id,
                                                         generated_chart: parsePlotFromMessage(messages[index - 1]),
+                                                        citations: parseCitationFromMessage(messages[index - 1]),
                                                         exec_results: execResults,
-                                                        message_id: answer.id
                                                     }}
+                                                    messageId={answer.id} // Assuming message_id is the same as messageId  
+                                                    conversationId={appStateContext?.state.currentChat?.id as string || 'default-conversation-id'}  
+                                                    generated_chart={parsePlotFromMessage(messages[index - 1])} 
                                                     onCitationClicked={c => onShowCitation(c)}
                                                     onExectResultClicked={() => onShowExecResult(answerId)}
 
-                                                />}
+                                                />
+                                                )}
                                             </div> 
                                           ) : answer.role === ERROR ? <div className={styles.chatMessageError}>
                                                 <Stack horizontal className={styles.chatMessageErrorContent}>
@@ -907,8 +923,11 @@ return null
                                               answer={{
                                                     answer: "Thinking...",
                                                     citations: [],
-                                                    generated_chart: null
+                                                    generated_chart: null,
                                                 }}
+                                                messageId="11235811-placeholder-message-id" // placeholder ID
+                                                conversationId="11235811-placeholder-conversation-id" // placeholder ID  
+                                                generated_chart={null} 
                                                 onCitationClicked={() => null}                                               
                                                 onExectResultClicked={() => null}
                                             />

@@ -155,7 +155,7 @@ async def init_openai_client():
                 )
 
         # Deployment
-        deployment = app_settings.azure_openai_5.model5
+        deployment = app_settings.azure_openai_5.model
         if not deployment:
             raise ValueError("AZURE_OPENAI_MODEL is required")
 
@@ -283,13 +283,19 @@ def prepare_model_args(request_body, request_headers):
 
     model_args = {
         "messages": messages,
-        "model": app_settings.azure_openai_5.model5,
-        "max_completion_tokens": app_settings.azure_openai_5.max_completion_tokens,
+        "model": app_settings.azure_openai.model4,
+        # "model": app_settings.azure_openai_5.model,
+        ### currently not available through azure subscription sdk 2025-11-03
+        # reasoning...
+        # verbosity...
+        # "max_completion_tokens": app_settings.azure_openai_5.max_tokens,
         ### depreciated for gpt5
-        # "temperature": app_settings.azure_openai.temperature,
-        # "top_p": app_settings.azure_openai.top_p,
-        "stop": app_settings.azure_openai_5.stop_sequence,
-        "stream": app_settings.azure_openai_5.stream
+        "max_tokens": app_settings.azure_openai.max_tokens,
+
+        "temperature": app_settings.azure_openai.temperature,
+        "top_p": app_settings.azure_openai.top_p,
+        "stop": app_settings.azure_openai.stop_sequence,
+        "stream": app_settings.azure_openai.stream
     }
 
     if len(messages) > 0:
@@ -537,7 +543,7 @@ async def stream_chat_request(request_body, request_headers):
     history_metadata = request_body.get("history_metadata", {})
     
     async def generate(apim_request_id, history_metadata):
-        if app_settings.azure_openai_5.function_call_azure_functions_enabled:
+        if app_settings.azure_openai.function_call_azure_functions_enabled:
             # Maintain state during function call streaming
             function_call_stream_state = AzureOpenaiFunctionCallStreamState()
             
@@ -1051,7 +1057,7 @@ async def generate_title(conversation_messages) -> str:
     try:
         azure_openai_client = await init_openai_client()
         response = await azure_openai_client.chat.completions.create(
-            model=app_settings.azure_openai_5.model, messages=messages, temperature=1, max_completion_tokens=64
+            model=app_settings.azure_openai.model, messages=messages, temperature=1, max_tokens=64
         )
         ### configured here from max_tokens to max_completion_tokens
 
