@@ -1,3 +1,23 @@
+Skip to content
+Navigation Menu
+orangamin
+MR5-TB
+
+Type / to search
+Code
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Build and deploy Python app to Azure Web App - MR5-TB
+completed merging of TB default and main branch from MS #13
+Jobs
+Run details
+Workflow file for this run
+.github/workflows/main_mr5-tb.yml at cb04a77
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
@@ -40,7 +60,6 @@ jobs:
           path: |
             .
             !antenv/
-
       # 🚫 Opting Out of Oryx Build
       # If you prefer to disable the Oryx build process during deployment, follow these steps:
       # 1. Remove the SCM_DO_BUILD_DURING_DEPLOYMENT app setting from your Azure App Service Environment variables.
@@ -63,9 +82,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9AF35EAAEA6143E7BBE2B4E860250ADC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0A5F29B95A41478BBA49A5E9E5A0C6FD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5F34938E098E4A86A5BABB71149AFB01 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_87512BD3E78A4754B4AC7E7773528497 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0E9A0149EB9A49A598A55A4CA8560427 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_01ED954663CC4FD8BD24473EC5107D07 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
@@ -74,3 +93,4 @@ jobs:
           app-name: 'MR5-TB'
           slot-name: 'Production'
           
+completed merging of TB default and main branch from MS · orangamin/MR5-TB@cb04a77
