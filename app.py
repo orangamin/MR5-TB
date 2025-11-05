@@ -288,7 +288,7 @@ def prepare_model_args(request_body, request_headers):
         "top_p": app_settings.azure_openai.top_p,
         "stop": app_settings.azure_openai.stop_sequence,
         "stream": app_settings.azure_openai.stream,
-        "model": app_settings.azure_openai.model
+        "model": app_settings.azure_openai.model4
     }
 
     if len(messages) > 0:
@@ -1050,7 +1050,7 @@ async def generate_title(conversation_messages) -> str:
     try:
         azure_openai_client = await init_openai_client()
         response = await azure_openai_client.chat.completions.create(
-            model=app_settings.azure_openai.model, messages=messages, temperature=1, max_tokens=64
+            model=app_settings.azure_openai.model4, messages=messages, temperature=1, max_tokens=64
         )
 
         title = response.choices[0].message.content
