@@ -29,9 +29,19 @@ interface Props {
   onFeedback?: (feedback: 'like' | 'dislike') => void;
 }
 
-const generateSharePointUrl = (filepath: string) => {
+/*const generateSharePointUrl = (filepath: string) => {
     const filename = filepath.split('.')[0];  // Remove extension and anything after
     return `https://downergroup.sharepoint.com/sites/TrainBrainandGenAIRetrievalAssistants/_layouts/15/search.aspx?q=${encodeURIComponent(filename)}`;
+};*/
+
+const generateSharePointUrl = (filename: string) => {
+  const folderPath = "/sites/TrainBrainandGenAIRetrievalAssistants/Shared Documents/Retrieval Documents/TrainBrain/MR5";
+  const siteRoot = "https://downergroup.sharepoint.com/sites/TrainBrainandGenAIRetrievalAssistants/Shared%20Documents/Forms/AllItems.aspx";
+  
+  const id = encodeURIComponent(`${folderPath}/${filename}`);
+  const parent = encodeURIComponent(folderPath);
+  
+  return `${siteRoot}?id=${id}&parent=${parent}`;
 };
 
 export const Answer = ({
