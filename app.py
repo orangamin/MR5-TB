@@ -159,7 +159,7 @@ async def init_openai_client():
                 )
 
         # Deployment
-        deployment = app_settings.azure_openai.model
+        deployment = app_settings.azure_openai.model4
         if not deployment:
             raise ValueError("AZURE_OPENAI_MODEL is required")
 
