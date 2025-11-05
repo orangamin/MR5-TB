@@ -42,7 +42,11 @@ cosmos_db_ready = asyncio.Event()
 
 
 def create_app():
-    app = Quart(__name__)
+    app = Quart(
+        __name__,
+        static_folder="static",       
+        static_url_path="/static"     
+    )
     app.register_blueprint(bp)
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     
