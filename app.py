@@ -159,7 +159,7 @@ async def init_openai_client():
                 )
 
         # Deployment
-        deployment = app_settings.azure_openai.model4
+        deployment = app_settings.azure_openai_5.model
         if not deployment:
             raise ValueError("AZURE_OPENAI_MODEL is required")
 
@@ -1054,7 +1054,8 @@ async def generate_title(conversation_messages) -> str:
     try:
         azure_openai_client = await init_openai_client()
         response = await azure_openai_client.chat.completions.create(
-            model=app_settings.azure_openai.model4, messages=messages, temperature=1, max_tokens=64
+            model=app_settings.azure_openai_5.model, messages=messages, 
+            # temperature=1, max_tokens=64
         )
 
         title = response.choices[0].message.content
